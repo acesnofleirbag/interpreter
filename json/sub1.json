@@ -1,0 +1,35 @@
+{
+  "name": "example",
+  "expression": {
+    "kind": "Binary",
+    "lhs": {
+      "kind": "Int",
+      "value": 10,
+      "location": {
+        "start": 0,
+        "end": 2,
+        "filename": "example"
+      }
+    },
+    "op": "Sub",
+    "rhs": {
+      "kind": "Int",
+      "value": 2,
+      "location": {
+        "start": 5,
+        "end": 6,
+        "filename": "example"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 6,
+      "filename": "example"
+    }
+  },
+  "location": {
+    "start": 0,
+    "end": 6,
+    "filename": "example"
+  }
+}

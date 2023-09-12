@@ -1,0 +1,35 @@
+{
+  "name": "example",
+  "expression": {
+    "kind": "Binary",
+    "lhs": {
+      "kind": "Str",
+      "value": "b",
+      "location": {
+        "start": 0,
+        "end": 3,
+        "filename": "example"
+      }
+    },
+    "op": "Gt",
+    "rhs": {
+      "kind": "Str",
+      "value": "a",
+      "location": {
+        "start": 6,
+        "end": 9,
+        "filename": "example"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 9,
+      "filename": "example"
+    }
+  },
+  "location": {
+    "start": 0,
+    "end": 9,
+    "filename": "example"
+  }
+}

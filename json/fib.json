@@ -1,0 +1,215 @@
+{
+  "name": "example",
+  "expression": {
+    "kind": "Let",
+    "name": {
+      "text": "fib",
+      "location": {
+        "start": 4,
+        "end": 7,
+        "filename": "example"
+      }
+    },
+    "value": {
+      "kind": "Function",
+      "parameters": [
+        {
+          "text": "n",
+          "location": {
+            "start": 14,
+            "end": 15,
+            "filename": "example"
+          }
+        }
+      ],
+      "value": {
+        "kind": "If",
+        "condition": {
+          "kind": "Binary",
+          "lhs": {
+            "kind": "Var",
+            "text": "n",
+            "location": {
+              "start": 30,
+              "end": 31,
+              "filename": "example"
+            }
+          },
+          "op": "Lt",
+          "rhs": {
+            "kind": "Int",
+            "value": 2,
+            "location": {
+              "start": 34,
+              "end": 35,
+              "filename": "example"
+            }
+          },
+          "location": {
+            "start": 30,
+            "end": 35,
+            "filename": "example"
+          }
+        },
+        "then": {
+          "kind": "Var",
+          "text": "n",
+          "location": {
+            "start": 47,
+            "end": 48,
+            "filename": "example"
+          }
+        },
+        "otherwise": {
+          "kind": "Binary",
+          "lhs": {
+            "kind": "Call",
+            "callee": {
+              "kind": "Var",
+              "text": "fib",
+              "location": {
+                "start": 70,
+                "end": 73,
+                "filename": "example"
+              }
+            },
+            "arguments": [
+              {
+                "kind": "Binary",
+                "lhs": {
+                  "kind": "Var",
+                  "text": "n",
+                  "location": {
+                    "start": 74,
+                    "end": 75,
+                    "filename": "example"
+                  }
+                },
+                "op": "Sub",
+                "rhs": {
+                  "kind": "Int",
+                  "value": 1,
+                  "location": {
+                    "start": 78,
+                    "end": 79,
+                    "filename": "example"
+                  }
+                },
+                "location": {
+                  "start": 74,
+                  "end": 79,
+                  "filename": "example"
+                }
+              }
+            ],
+            "location": {
+              "start": 70,
+              "end": 80,
+              "filename": "example"
+            }
+          },
+          "op": "Add",
+          "rhs": {
+            "kind": "Call",
+            "callee": {
+              "kind": "Var",
+              "text": "fib",
+              "location": {
+                "start": 83,
+                "end": 86,
+                "filename": "example"
+              }
+            },
+            "arguments": [
+              {
+                "kind": "Binary",
+                "lhs": {
+                  "kind": "Var",
+                  "text": "n",
+                  "location": {
+                    "start": 87,
+                    "end": 88,
+                    "filename": "example"
+                  }
+                },
+                "op": "Sub",
+                "rhs": {
+                  "kind": "Int",
+                  "value": 2,
+                  "location": {
+                    "start": 91,
+                    "end": 92,
+                    "filename": "example"
+                  }
+                },
+                "location": {
+                  "start": 87,
+                  "end": 92,
+                  "filename": "example"
+                }
+              }
+            ],
+            "location": {
+              "start": 83,
+              "end": 93,
+              "filename": "example"
+            }
+          },
+          "location": {
+            "start": 70,
+            "end": 93,
+            "filename": "example"
+          }
+        },
+        "location": {
+          "start": 26,
+          "end": 99,
+          "filename": "example"
+        }
+      },
+      "location": {
+        "start": 10,
+        "end": 101,
+        "filename": "example"
+      }
+    },
+    "next": {
+      "kind": "Call",
+      "callee": {
+        "kind": "Var",
+        "text": "fib",
+        "location": {
+          "start": 104,
+          "end": 107,
+          "filename": "example"
+        }
+      },
+      "arguments": [
+        {
+          "kind": "Int",
+          "value": 10,
+          "location": {
+            "start": 108,
+            "end": 110,
+            "filename": "example"
+          }
+        }
+      ],
+      "location": {
+        "start": 104,
+        "end": 111,
+        "filename": "example"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 111,
+      "filename": "example"
+    }
+  },
+  "location": {
+    "start": 0,
+    "end": 111,
+    "filename": "example"
+  }
+}

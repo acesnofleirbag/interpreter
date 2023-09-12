@@ -1,0 +1,25 @@
+{
+  "name": "example",
+  "expression": {
+    "kind": "Print",
+    "value": {
+      "kind": "Str",
+      "value": "output",
+      "location": {
+        "start": 6,
+        "end": 14,
+        "filename": "example"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 15,
+      "filename": "example"
+    }
+  },
+  "location": {
+    "start": 0,
+    "end": 15,
+    "filename": "example"
+  }
+}

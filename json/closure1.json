@@ -1,0 +1,61 @@
+{
+  "name": "example",
+  "expression": {
+    "kind": "Function",
+    "parameters": [
+      {
+        "text": "a",
+        "location": {
+          "start": 4,
+          "end": 5,
+          "filename": "example"
+        }
+      },
+      {
+        "text": "b",
+        "location": {
+          "start": 7,
+          "end": 8,
+          "filename": "example"
+        }
+      }
+    ],
+    "value": {
+      "kind": "Binary",
+      "lhs": {
+        "kind": "Var",
+        "text": "a",
+        "location": {
+          "start": 19,
+          "end": 20,
+          "filename": "example"
+        }
+      },
+      "op": "Add",
+      "rhs": {
+        "kind": "Var",
+        "text": "b",
+        "location": {
+          "start": 23,
+          "end": 24,
+          "filename": "example"
+        }
+      },
+      "location": {
+        "start": 19,
+        "end": 24,
+        "filename": "example"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 26,
+      "filename": "example"
+    }
+  },
+  "location": {
+    "start": 0,
+    "end": 26,
+    "filename": "example"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "name": "example",
+  "expression": {
+    "kind": "Second",
+    "value": {
+      "kind": "Tuple",
+      "first": {
+        "kind": "Int",
+        "value": 1,
+        "location": {
+          "start": 8,
+          "end": 9,
+          "filename": "example"
+        }
+      },
+      "second": {
+        "kind": "Int",
+        "value": 7,
+        "location": {
+          "start": 11,
+          "end": 12,
+          "filename": "example"
+        }
+      },
+      "location": {
+        "start": 7,
+        "end": 13,
+        "filename": "example"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 14,
+      "filename": "example"
+    }
+  },
+  "location": {
+    "start": 0,
+    "end": 14,
+    "filename": "example"
+  }
+}

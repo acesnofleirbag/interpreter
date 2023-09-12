@@ -1,0 +1,105 @@
+{
+  "name": "example",
+  "expression": {
+    "kind": "Let",
+    "name": {
+      "text": "add",
+      "location": {
+        "start": 4,
+        "end": 7,
+        "filename": "example"
+      }
+    },
+    "value": {
+      "kind": "Function",
+      "parameters": [
+        {
+          "text": "a",
+          "location": {
+            "start": 14,
+            "end": 15,
+            "filename": "example"
+          }
+        },
+        {
+          "text": "b",
+          "location": {
+            "start": 17,
+            "end": 18,
+            "filename": "example"
+          }
+        }
+      ],
+      "value": {
+        "kind": "Binary",
+        "lhs": {
+          "kind": "Var",
+          "text": "a",
+          "location": {
+            "start": 29,
+            "end": 30,
+            "filename": "example"
+          }
+        },
+        "op": "Add",
+        "rhs": {
+          "kind": "Var",
+          "text": "b",
+          "location": {
+            "start": 33,
+            "end": 34,
+            "filename": "example"
+          }
+        },
+        "location": {
+          "start": 29,
+          "end": 34,
+          "filename": "example"
+        }
+      },
+      "location": {
+        "start": 10,
+        "end": 36,
+        "filename": "example"
+      }
+    },
+    "next": {
+      "kind": "Call",
+      "callee": {
+        "kind": "Var",
+        "text": "add",
+        "location": {
+          "start": 39,
+          "end": 42,
+          "filename": "example"
+        }
+      },
+      "arguments": [
+        {
+          "kind": "Int",
+          "value": 1,
+          "location": {
+            "start": 43,
+            "end": 44,
+            "filename": "example"
+          }
+        }
+      ],
+      "location": {
+        "start": 39,
+        "end": 45,
+        "filename": "example"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 45,
+      "filename": "example"
+    }
+  },
+  "location": {
+    "start": 0,
+    "end": 45,
+    "filename": "example"
+  }
+}

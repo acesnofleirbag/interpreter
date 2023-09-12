@@ -1,0 +1,25 @@
+{
+  "name": "example",
+  "expression": {
+    "kind": "Second",
+    "value": {
+      "kind": "Str",
+      "value": "abc",
+      "location": {
+        "start": 7,
+        "end": 12,
+        "filename": "example"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 13,
+      "filename": "example"
+    }
+  },
+  "location": {
+    "start": 0,
+    "end": 13,
+    "filename": "example"
+  }
+}

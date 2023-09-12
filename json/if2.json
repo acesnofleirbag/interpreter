@@ -1,0 +1,43 @@
+{
+  "name": "example",
+  "expression": {
+    "kind": "If",
+    "condition": {
+      "kind": "Bool",
+      "value": false,
+      "location": {
+        "start": 4,
+        "end": 9,
+        "filename": "example"
+      }
+    },
+    "then": {
+      "kind": "Str",
+      "value": "ok",
+      "location": {
+        "start": 13,
+        "end": 17,
+        "filename": "example"
+      }
+    },
+    "otherwise": {
+      "kind": "Str",
+      "value": "fail",
+      "location": {
+        "start": 27,
+        "end": 33,
+        "filename": "example"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 35,
+      "filename": "example"
+    }
+  },
+  "location": {
+    "start": 0,
+    "end": 35,
+    "filename": "example"
+  }
+}
