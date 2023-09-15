@@ -1,5 +1,6 @@
 use core::fmt;
-use std::{collections::HashMap, fs, path::Path};
+use num_bigint::BigInt;
+use std::{collections::HashMap, fs, path::Path, rc::Rc, cell::RefCell, thread, sync::{mpsc, Mutex, Arc, RwLock}};
 
 mod ast;
 mod fib;
@@ -8,7 +9,7 @@ use ast::*;
 use fib::*;
 
 #[derive(Debug, Clone)]
-pub struct Error {
+struct Error {
     pub start: usize,
     pub end: usize,
     pub filename: String,
@@ -28,7 +29,7 @@ impl Error {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Context {
-    outter: Option<HashMap<String, Output>>,
+    outter: Option<Box<Context>>,
     inner: HashMap<String, Output>,
 }
 
@@ -36,13 +37,14 @@ pub struct Context {
 pub struct Closure {
     pub body: Term,
     pub args: Vec<Parameter>,
-    pub context: Context,
+    pub context: Rc<RefCell<Context>>,
+    // pub context: Arc<RwLock<Context>>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Output {
     Bool(bool),
-    Int(u128),
+    Int(BigInt),
     Str(String),
     Tuple((Box<Output>, Box<Output>)),
     Closure(Closure),
@@ -60,10 +62,62 @@ impl fmt::Display for Output {
     }
 }
 
+/*
+type Job = Box<dyn FnOnce() -> Output + Send + 'static>;
+
+struct ThreadPool {
+    workers: Vec<Worker>,
+    tx: mpsc::Sender<Job>,
+}
+
+impl ThreadPool {
+    pub fn new(size: usize) -> Self {
+        assert!(size > 0);
+
+        let (tx, rx) = mpsc::channel();
+        let rx = Arc::new(Mutex::new(rx));
+        let mut workers = Vec::with_capacity(size);
+
+        for id in 0..size {
+            workers.push(Worker::new(id, Arc::clone(&rx)))
+        }
+
+        Self { workers, tx }
+    }
+
+    pub fn exec<F>(&self, f: F) 
+    where F: FnOnce() -> Output + Send + 'static {
+        let job = Box::new(f);
+
+        self.tx.send(job).unwrap()
+    }
+}
+
+struct Worker {
+    id: usize,
+    output: Output,
+}
+
+impl Worker {
+    fn new(id: usize, rx: Arc<Mutex<mpsc::Receiver<Job>>>) -> Self {
+        let output = thread::spawn(move || {
+            while let Ok(job) = rx.lock().unwrap().recv() {
+                job();
+            }
+        });
+
+        Self { id, output }
+    }
+}
+
+const CPU: usize = 2;
+const POOL: ThreadPool = ThreadPool::new(CPU * 2);
+*/
+
 fn eval(term: Term, context: &mut Context) -> Result<Output, Error> {
     match term {
         Term::Bool(x) => Ok(Output::Bool(x.value)),
-        Term::Int(x) => Ok(Output::Int(x.value as u128)),
+        Term::Int(x) => Ok(Output::Int(BigInt::from(x.value))),
         Term::Str(x) => Ok(Output::Str(x.value)),
         Term::Print(x) => {
             let expr = eval(*x.value, context)?;
@@ -74,13 +128,14 @@ fn eval(term: Term, context: &mut Context) -> Result<Output, Error> {
                 Output::Str(x) => println!("{}", x),
                 Output::Tuple(x) => println!("({}, {})", x.0, x.1),
                 Output::Closure(_) => println!("<#closure>"),
-                _ => return Err(Error::new("Unsupported expression", x.location)),
+                Output::Void => (),
             };
 
             Ok(Output::Void)
         }
         Term::Binary(x) => {
-            // @@@: spawn thread
+            // let lhs = POOL.exec(eval(*x.lhs, context));
+            // let rhs = POOL.exec(eval(*x.rhs, context));
             let lhs = eval(*x.lhs, context)?;
             let rhs = eval(*x.rhs, context)?;
 
@@ -102,7 +157,7 @@ fn eval(term: Term, context: &mut Context) -> Result<Output, Error> {
                 },
                 BinaryOp::Div => match (lhs, rhs) {
                     (Output::Int(a), Output::Int(b)) => {
-                        if b > 0 {
+                        if b > BigInt::from(0) {
                             Ok(Output::Int(a / b))
                         } else {
                             Err(Error::new("Arithmetic error, dividing by zero", x.location))
@@ -138,7 +193,7 @@ fn eval(term: Term, context: &mut Context) -> Result<Output, Error> {
                 },
                 BinaryOp::Rem => match (lhs, rhs) {
                     (Output::Int(a), Output::Int(b)) => {
-                        if b > 0 {
+                        if b > BigInt::from(0) {
                             Ok(Output::Int(a % b))
                         } else {
                             Err(Error::new("Arithmetic error, dividing by zero", x.location))
@@ -169,7 +224,8 @@ fn eval(term: Term, context: &mut Context) -> Result<Output, Error> {
             }
         }
         Term::Tuple(x) => {
-            // @@@: spawn thread
+            // let _1st = POOL.exec(eval(*x.first, context));
+            // let _2nd = POOL.exec(eval(*x.second, context));
             let _1st = eval(*x.first, context)?;
             let _2nd = eval(*x.second, context)?;
 
@@ -201,44 +257,40 @@ fn eval(term: Term, context: &mut Context) -> Result<Output, Error> {
         }
         Term::Var(x) => {
             if let Some(var) = context.inner.get(&x.text) {
-                Ok(var.clone())
-            } else if let Some(outter) = &context.outter {
-                if let Some(var) = outter.get(&x.text) {
-                    Ok(var.clone())
-                } else {
-                    let msg = format!("Variable {} is not declared", &x.text);
+                return Ok(var.clone());
+            } 
 
-                    Err(Error::new(msg.as_str(), x.location))
+            let mut ctx = &context.outter;
+
+            while let Some(outter) = ctx {
+                if let Some(var) = outter.inner.get(&x.text) {
+                    return Ok(var.clone());
                 }
-            } else {
-                let msg = format!("Variable {} is not declared", &x.text);
 
-                Err(Error::new(msg.as_str(), x.location))
+                ctx = &outter.outter;
             }
+
+            let msg = format!("Variable {} is not declared", &x.text);
+
+            Err(Error::new(msg.as_str(), x.location))
         }
         Term::Let(x) => {
             let id = x.name.text;
             let expr = eval(*x.value, context)?;
 
-            if let Some(_) = &mut context.outter {
-                () // Outter context already declared
-            } else {
-                context.outter = Some(HashMap::new());
-            }
-
-            // FIXME: context.inner
             match expr {
                 Output::Closure(y) => {
                     let closure = Output::Closure(Closure {
                         body: y.body,
                         args: y.args,
-                        context: context.clone(),
+                        context: Rc::new(RefCell::new(context.clone())),
+                        // context: Arc::new(RwLock::new(context.clone())),
                     });
 
-                    context.outter.as_mut().unwrap().insert(id, closure);
+                    context.inner.insert(id, closure);
                 }
                 y => {
-                    context.outter.as_mut().unwrap().insert(id, y);
+                    context.inner.insert(id, y);
                 }
             }
 
@@ -246,18 +298,16 @@ fn eval(term: Term, context: &mut Context) -> Result<Output, Error> {
         }
         Term::Call(x) => {
             let mut new_context = Context {
-                outter: context.outter.clone(),
+                outter: Some(Box::new(context.clone())),
                 inner: HashMap::new(),
             };
 
             if let Term::Var(z) = *x.callee.clone() {
                 if z.text == "fib" {
-                    // FIXME: integer overflow ???
                     if let Output::Int(nth) = eval(x.arguments[0].clone(), context)? {
-                        let res: u128;
+                        let res: BigInt;
 
-                        // @@@: test others algorithms
-                        if nth < 1000 {
+                        if nth < BigInt::from(1000) {
                             res = __fib_iter(nth);
                         } else {
                             res = __fib_matrix(nth);
@@ -291,7 +341,9 @@ fn eval(term: Term, context: &mut Context) -> Result<Output, Error> {
         Term::Function(x) => Ok(Output::Closure(Closure {
             body: *x.value,
             args: x.parameters,
-            context: context.clone(),
+            // @@@
+            context: Rc::new(RefCell::new(context.clone())),
+            // context: Arc::new(RwLock::new(context.clone())),
         })),
     }
 }
@@ -338,7 +390,7 @@ mod tests {
 
         let res = eval(prog.expression, &mut context).unwrap();
 
-        assert_eq!(res, Output::Int(55));
+        assert_eq!(res, Output::Int(BigInt::from(55)));
     }
 
     #[test]
@@ -364,7 +416,7 @@ mod tests {
 
         let res = eval(prog.expression, &mut context).unwrap();
 
-        assert_eq!(res, Output::Int(3));
+        assert_eq!(res, Output::Int(BigInt::from(3)));
     }
 
     #[test]
@@ -429,7 +481,7 @@ mod tests {
 
         let res = eval(prog.expression, &mut context).unwrap();
 
-        assert_eq!(res, Output::Int(8));
+        assert_eq!(res, Output::Int(BigInt::from(8)));
     }
 
     #[test]
@@ -455,7 +507,7 @@ mod tests {
 
         let res = eval(prog.expression, &mut context).unwrap();
 
-        assert_eq!(res, Output::Int(4));
+        assert_eq!(res, Output::Int(BigInt::from(4)));
     }
 
     #[test]
@@ -481,7 +533,7 @@ mod tests {
 
         let res = eval(prog.expression, &mut context).unwrap();
 
-        assert_eq!(res, Output::Int(5));
+        assert_eq!(res, Output::Int(BigInt::from(5)));
     }
 
     #[test]
@@ -624,7 +676,7 @@ mod tests {
 
         let res = eval(prog.expression, &mut context).unwrap();
 
-        assert_eq!(res, Output::Int(0));
+        assert_eq!(res, Output::Int(BigInt::from(0)));
     }
 
     #[test]
@@ -650,7 +702,7 @@ mod tests {
 
         let res = eval(prog.expression, &mut context).unwrap();
 
-        assert_eq!(res, Output::Int(2));
+        assert_eq!(res, Output::Int(BigInt::from(2)));
     }
 
     #[test]
@@ -663,7 +715,7 @@ mod tests {
 
         let res = eval(prog.expression, &mut context).unwrap();
 
-        assert_eq!(res, Output::Int(5));
+        assert_eq!(res, Output::Int(BigInt::from(5)));
     }
 
     #[test]
@@ -733,7 +785,7 @@ mod tests {
 
         assert_eq!(
             res,
-            Output::Tuple((Box::new(Output::Int(1)), Box::new(Output::Int(2))))
+            Output::Tuple((Box::new(Output::Int(BigInt::from(1))), Box::new(Output::Int(BigInt::from(2)))))
         );
     }
 
@@ -747,7 +799,7 @@ mod tests {
 
         let res = eval(prog.expression, &mut context).unwrap();
 
-        assert_eq!(res, Output::Int(3));
+        assert_eq!(res, Output::Int(BigInt::from(3)));
     }
 
     #[test]
@@ -760,7 +812,7 @@ mod tests {
 
         let res = eval(prog.expression, &mut context).unwrap();
 
-        assert_eq!(res, Output::Int(1));
+        assert_eq!(res, Output::Int(BigInt::from(1)));
     }
 
     #[test]
@@ -786,7 +838,7 @@ mod tests {
 
         let res = eval(prog.expression, &mut context).unwrap();
 
-        assert_eq!(res, Output::Int(7));
+        assert_eq!(res, Output::Int(BigInt::from(7)));
     }
 
     #[test]
